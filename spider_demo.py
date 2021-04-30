@@ -2,44 +2,22 @@ import requests
 from bs4 import BeautifulSoup
 
 def spider():
-    for page in range(8560, 8565):
-        for n in range(2):
-            next = '_1'
-            if n  == 0:
-                url = 'https://www.book900.com/4_4946/' + str(page)
-            else:
-                url = 'https://www.book900.com/4_4946/' + str(page) + next
-            response = requests.get(url)
+    url = 'https://html.com/tags/table/'
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 '
+                    '(KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36'
+    }
+    response = requests.post(url, headers=headers)
 
-            bsobj = BeautifulSoup(response.text, 'lxml')
-            title = str(bsobj.find('h1'))
-            data = str(bsobj.find(id='content'))
+    bsobj = BeautifulSoup(response.text, 'lxml')
+    tables = bsobj.find('table')
+    text = []
 
-            retitle = ['<h1>', '(2/2)</h1>']
-            for i in retitle:
-                title = title.replace(i, '')
+    for table in tables:
+        for tr in table.find_all('tr'):
+            for td in tr.find_all('td'):
+                text.append(td.get_text())
 
-
-            redata = ['\n', '\t', '\xa0', '<br/>', '<div id="content">', '<br-->', '&gt;', '</div>', '--', ' </br>',
-                      '<p class="to_nextpage"><a href="/4_4946/' + str(page) + next + '" rel="next">'
-                      '本章未完，点击下一页继续阅读</a></p>']
-            for i in redata:
-                data = data.replace(i,'')
-
-            if n == 0:
-                text_1 = data
-            else:
-                text_2 = data.lstrip('\r')
-                text_2 = text_2.rstrip('。')
-
-        fp = open(f'note\\{title}.txt', 'w', encoding='utf-8')
-        fp.write(title)
-        fp.write('\n')
-        fp.write(text_1)
-        fp.write('\n')
-        fp.write(text_2)
-        fp.write('\n')
-        print(title + ' 下载完成！')
-        fp.close()
+    print(text)
 
 spider()
